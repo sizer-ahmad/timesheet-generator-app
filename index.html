@@ -136,7 +136,6 @@
     <header
       class="bg-slate-900 text-white shadow-md px-6 py-4 flex items-center justify-between border-b border-slate-800 dark:border-slate-700 light:bg-white"
     >
-      <!-- Left: Brand -->
       <div class="flex items-center space-x-3">
         <div class="bg-emerald-500 p-2 rounded-lg text-slate-900">
           <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
@@ -183,7 +182,6 @@
               <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
             </svg>
           </span>
-          <!-- Track -->
           <div class="toggle-track" id="toggleTrack">
             <div class="toggle-thumb dark-pos" id="toggleThumb"></div>
           </div>
@@ -278,7 +276,7 @@
               </div>
               <div
                 id="statResources"
-                class="text-xl font-bold text-slate-700 dark:text-slate-100"
+                class="text-sm font-bold text-slate-700 dark:text-slate-100"
               >
                 0
               </div>
@@ -300,7 +298,7 @@
               </div>
               <div
                 id="statTotalHours"
-                class="text-xl font-bold text-slate-700 dark:text-slate-100"
+                class="text-sm font-bold text-slate-700 dark:text-slate-100"
               >
                 0h 0m
               </div>
@@ -322,7 +320,7 @@
               </div>
               <div
                 id="statTimePeriod"
-                class="text-sm font-bold text-slate-700 dark:text-slate-100 whitespace-nowrap"
+                class="text-sm font-bold text-slate-700 dark:text-slate-100 leading-snug"
               >
                 -
               </div>
@@ -643,7 +641,13 @@
           );
           const minDate = new Date(Math.min(...dates));
           const maxDate = new Date(Math.max(...dates));
-          statTimePeriod.innerText = `${minDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${maxDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+          const fmtDate = (d) => {
+            const day = d.getDate().toString().padStart(2, "0");
+            const mon = d.toLocaleDateString("en-US", { month: "short" });
+            const yr = d.getFullYear().toString().slice(-2);
+            return `${day}-${mon}-${yr}`;
+          };
+          statTimePeriod.innerHTML = `${fmtDate(minDate)} <span style="white-space:nowrap">to ${fmtDate(maxDate)}</span>`;
           downloadBtn.disabled = false;
         } else {
           alert("Processing complete but 0 rows extracted.");
@@ -807,6 +811,7 @@
           }
         });
 
+        // Header Style Override
         const headerRow = worksheet.getRow(1);
         headerRow.alignment = {
           wrapText: true,
