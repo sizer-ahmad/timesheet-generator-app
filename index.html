@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,6 +13,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.321.0/dist/umd/lucide.min.js"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+      };
+    </script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
       body {
@@ -25,37 +30,180 @@
       .custom-scrollbar::-webkit-scrollbar-track {
         background: #f1f5f9;
       }
+      .dark .custom-scrollbar::-webkit-scrollbar-track {
+        background: #1e293b;
+      }
       .custom-scrollbar::-webkit-scrollbar-thumb {
         background: #cbd5e1;
         border-radius: 4px;
       }
+      .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #475569;
+      }
       .custom-scrollbar::-webkit-scrollbar-thumb:hover {
         background: #94a3b8;
       }
+
+      /* Theme Toggle Switch */
+      .theme-toggle {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .toggle-track {
+        position: relative;
+        width: 52px;
+        height: 26px;
+        background-color: #334155;
+        border-radius: 9999px;
+        transition: background-color 0.3s ease;
+        border: 1px solid #475569;
+      }
+      .light-mode .toggle-track {
+        background-color: #e2e8f0;
+        border-color: #cbd5e1;
+      }
+      .toggle-thumb {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 20px;
+        height: 20px;
+        background: #ffffff;
+        border-radius: 50%;
+        transition:
+          transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+          box-shadow 0.3s ease;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+      }
+      /* Dark mode: thumb on right */
+      .toggle-thumb.dark-pos {
+        transform: translateX(26px);
+      }
+      /* Light mode: thumb on left */
+      .toggle-thumb.light-pos {
+        transform: translateX(0px);
+      }
+      .toggle-icon {
+        display: flex;
+        align-items: center;
+        transition:
+          opacity 0.2s ease,
+          color 0.2s ease;
+      }
+      /* Sun: bright (amber) in light mode, faded in dark mode */
+      .icon-sun {
+        color: #fbbf24;
+        opacity: 1;
+        transition:
+          opacity 0.3s ease,
+          color 0.3s ease;
+      }
+      .dark .icon-sun {
+        opacity: 0.35;
+      }
+      /* Moon: bright (blue) in dark mode, faded in light mode */
+      .icon-moon {
+        color: #94a3b8;
+        opacity: 0.35;
+        transition:
+          opacity 0.3s ease,
+          color 0.3s ease;
+      }
+      .dark .icon-moon {
+        color: #818cf8;
+        opacity: 1;
+      }
+
+      /* Dark mode body/layout overrides */
+      .dark body {
+        background-color: #0f172a;
+        color: #e2e8f0;
+      }
+      /* Light mode */
+      body {
+        background-color: #f8fafc;
+        color: #1e293b;
+      }
     </style>
   </head>
-  <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+  <body
+    class="min-h-screen flex flex-col bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300"
+  >
     <header
-      class="bg-slate-900 text-white shadow-md px-6 py-4 flex items-center justify-between border-b border-slate-800"
+      class="bg-slate-900 text-white shadow-md px-6 py-4 flex items-center justify-between border-b border-slate-800 dark:border-slate-700 light:bg-white"
     >
+      <!-- Left: Brand -->
       <div class="flex items-center space-x-3">
         <div class="bg-emerald-500 p-2 rounded-lg text-slate-900">
           <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-tight">Timesheet Generator</h1>
+          <h1 class="text-xl font-bold tracking-tight text-white">
+            Timesheet Generator
+          </h1>
           <p class="text-xs text-slate-400 font-medium">
             Advanced Markdown Parser & Styling
           </p>
         </div>
       </div>
-      <div
-        class="text-xs text-slate-400 bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700"
-      >
-        <span
-          class="inline-block w-2 h-2 bg-emerald-400 rounded-full mr-1.5 animate-pulse"
-        ></span>
-        Defined Bound Formatting
+
+      <!-- Right: Theme Toggle -->
+      <div class="flex items-center gap-3">
+        <label
+          class="theme-toggle"
+          id="themeToggle"
+          title="Toggle theme"
+          aria-label="Toggle dark/light mode"
+        >
+          <!-- Sun icon (left) -->
+          <span class="toggle-icon icon-sun">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </span>
+          <!-- Track -->
+          <div class="toggle-track" id="toggleTrack">
+            <div class="toggle-thumb dark-pos" id="toggleThumb"></div>
+          </div>
+          <!-- Moon icon (right) -->
+          <span class="toggle-icon icon-moon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </span>
+        </label>
       </div>
     </header>
 
@@ -64,11 +212,11 @@
     >
       <section class="lg:col-span-2 flex flex-col space-y-4">
         <div
-          class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col flex-1 min-h-[500px]"
+          class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col flex-1 min-h-[500px] transition-colors duration-300"
         >
           <div class="flex items-center justify-between mb-3">
             <label
-              class="block text-sm font-semibold text-slate-700 flex items-center gap-2"
+              class="block text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2"
             >
               <i data-lucide="edit-3" class="w-4 h-4 text-indigo-500"></i> Input
               Source
@@ -76,7 +224,7 @@
             <div class="flex gap-2">
               <label
                 for="fileInput"
-                class="cursor-pointer text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-1.5 px-3 rounded transition flex items-center gap-1.5"
+                class="cursor-pointer text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 font-medium py-1.5 px-3 rounded transition flex items-center gap-1.5"
               >
                 <i data-lucide="upload" class="w-3.5 h-3.5"></i> Upload File
               </label>
@@ -88,20 +236,20 @@
               />
               <button
                 id="clearBtn"
-                class="text-xs text-slate-500 hover:text-red-500 font-medium transition flex items-center gap-1"
+                class="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 font-medium transition flex items-center gap-1"
               >
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Clear
               </button>
             </div>
           </div>
-
           <textarea
             id="markdownInput"
-            class="flex-1 w-full p-4 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 resize-none custom-scrollbar"
+            class="flex-1 w-full p-4 border border-slate-200 dark:border-slate-600 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 dark:bg-slate-900 dark:text-slate-200 resize-none custom-scrollbar transition-colors duration-300"
             placeholder="Paste your markdown source here or upload a file..."
           ></textarea>
-
-          <div class="mt-4 pt-3 border-t border-slate-100 flex gap-3">
+          <div
+            class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700 flex gap-3"
+          >
             <button
               id="processBtn"
               class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2.5 px-4 rounded-lg shadow-sm transition flex items-center justify-center gap-2"
@@ -115,48 +263,66 @@
       <section class="lg:col-span-3 flex flex-col space-y-4">
         <div class="grid grid-cols-3 gap-4">
           <div
-            class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3"
+            class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-3 transition-colors duration-300"
           >
-            <div class="p-3 bg-indigo-50 rounded-lg text-indigo-600">
+            <div
+              class="p-3 bg-indigo-50 dark:bg-indigo-900/40 rounded-lg text-indigo-600 dark:text-indigo-400"
+            >
               <i data-lucide="users" class="w-5 h-5"></i>
             </div>
             <div>
-              <div class="text-xs text-slate-400 font-medium uppercase">
+              <div
+                class="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase"
+              >
                 Resources Found
               </div>
-              <div id="statResources" class="text-xl font-bold text-slate-700">
+              <div
+                id="statResources"
+                class="text-xl font-bold text-slate-700 dark:text-slate-100"
+              >
                 0
               </div>
             </div>
           </div>
           <div
-            class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3"
+            class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-3 transition-colors duration-300"
           >
-            <div class="p-3 bg-amber-50 rounded-lg text-amber-600">
+            <div
+              class="p-3 bg-amber-50 dark:bg-amber-900/40 rounded-lg text-amber-600 dark:text-amber-400"
+            >
               <i data-lucide="clock" class="w-5 h-5"></i>
             </div>
             <div>
-              <div class="text-xs text-slate-400 font-medium uppercase">
+              <div
+                class="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase"
+              >
                 Total Duration
               </div>
-              <div id="statTotalHours" class="text-xl font-bold text-slate-700">
+              <div
+                id="statTotalHours"
+                class="text-xl font-bold text-slate-700 dark:text-slate-100"
+              >
                 0h 0m
               </div>
             </div>
           </div>
           <div
-            class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3"
+            class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-3 transition-colors duration-300"
           >
-            <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600">
+            <div
+              class="p-3 bg-emerald-50 dark:bg-emerald-900/40 rounded-lg text-emerald-600 dark:text-emerald-400"
+            >
               <i data-lucide="calendar" class="w-5 h-5"></i>
             </div>
             <div>
-              <div class="text-xs text-slate-400 font-medium uppercase">
+              <div
+                class="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase"
+              >
                 Time Period
               </div>
               <div
                 id="statTimePeriod"
-                class="text-sm font-bold text-slate-700 whitespace-nowrap"
+                class="text-sm font-bold text-slate-700 dark:text-slate-100 whitespace-nowrap"
               >
                 -
               </div>
@@ -165,13 +331,13 @@
         </div>
 
         <div
-          class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col flex-1"
+          class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col flex-1 transition-colors duration-300"
         >
           <div
-            class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between"
+            class="px-5 py-4 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between"
           >
             <h3
-              class="text-sm font-semibold text-slate-700 flex items-center gap-2"
+              class="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2"
             >
               <i data-lucide="eye" class="w-4 h-4 text-emerald-500"></i>
               Spreadsheet Generation Preview
@@ -179,23 +345,22 @@
             <button
               id="downloadBtn"
               disabled
-              class="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white text-xs font-semibold py-2 px-4 rounded-lg transition shadow-sm flex items-center gap-1.5"
+              class="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 dark:disabled:bg-slate-700 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:cursor-not-allowed text-white text-xs font-semibold py-2 px-4 rounded-lg transition shadow-sm flex items-center gap-1.5"
             >
               <i data-lucide="download" class="w-3.5 h-3.5"></i> Download
               Formatted Excel (.xlsx)
             </button>
           </div>
-
           <div
-            class="flex-1 overflow-auto custom-scrollbar p-0 bg-slate-100/50"
+            class="flex-1 overflow-auto custom-scrollbar p-0 bg-slate-100/50 dark:bg-slate-900/30"
           >
             <table
               id="previewTable"
-              class="w-full text-left border-collapse text-xs bg-white min-w-[700px]"
+              class="w-full text-left border-collapse text-xs bg-white dark:bg-slate-800 min-w-[700px] transition-colors duration-300"
             >
               <thead>
                 <tr
-                  class="bg-slate-800 text-slate-200 uppercase font-semibold border-b border-slate-700 sticky top-0 shadow-sm"
+                  class="bg-slate-800 dark:bg-slate-900 text-slate-200 uppercase font-semibold border-b border-slate-700 sticky top-0 shadow-sm"
                 >
                   <th class="p-3 text-center border-r border-slate-700">
                     Date
@@ -212,18 +377,21 @@
                   <th class="p-3">Resource</th>
                 </tr>
               </thead>
-              <tbody id="previewBody" class="divide-y divide-slate-100">
+              <tbody
+                id="previewBody"
+                class="divide-y divide-slate-100 dark:divide-slate-700"
+              >
                 <tr>
                   <td
                     colspan="7"
-                    class="p-8 text-center text-slate-400 font-medium bg-white"
+                    class="p-8 text-center text-slate-400 font-medium bg-white dark:bg-slate-800"
                   >
                     <div
                       class="flex flex-col items-center justify-center space-y-2"
                     >
                       <i
                         data-lucide="database"
-                        class="w-8 h-8 text-slate-300"
+                        class="w-8 h-8 text-slate-300 dark:text-slate-600"
                       ></i>
                       <span
                         >No data processed yet. Enter markdown on the left
@@ -240,7 +408,7 @@
     </main>
 
     <footer
-      class="bg-white border-t border-slate-200 py-4 text-center text-sm text-slate-500 font-medium"
+      class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 py-4 text-center text-sm text-slate-500 dark:text-slate-400 font-medium transition-colors duration-300"
     >
       <a
         href="https://www.deltapath.com/"
@@ -261,19 +429,50 @@
     </footer>
 
     <script>
+      // Theme Management
+      const htmlEl = document.documentElement;
+      const themeToggle = document.getElementById("themeToggle");
+      const toggleThumb = document.getElementById("toggleThumb");
+      const toggleTrack = document.getElementById("toggleTrack");
+      function applyTheme(isDark) {
+        if (isDark) {
+          htmlEl.classList.add("dark");
+          toggleThumb.classList.remove("light-pos");
+          toggleThumb.classList.add("dark-pos");
+          toggleTrack.classList.remove("light-mode");
+        } else {
+          htmlEl.classList.remove("dark");
+          toggleThumb.classList.remove("dark-pos");
+          toggleThumb.classList.add("light-pos");
+          toggleTrack.classList.add("light-mode");
+        }
+      }
+
+      // Load saved preference; default = dark
+      const savedTheme = localStorage.getItem("timesheetTheme");
+      const isDarkDefault = savedTheme === null ? true : savedTheme === "dark";
+      applyTheme(isDarkDefault);
+
+      themeToggle.addEventListener("click", () => {
+        const currentlyDark = htmlEl.classList.contains("dark");
+        const newDark = !currentlyDark;
+        applyTheme(newDark);
+        localStorage.setItem("timesheetTheme", newDark ? "dark" : "light");
+      });
+
+      // Lucide Icons
       lucide.createIcons();
 
+      // App Logic
       const markdownInput = document.getElementById("markdownInput");
       const fileInput = document.getElementById("fileInput");
       const processBtn = document.getElementById("processBtn");
       const clearBtn = document.getElementById("clearBtn");
       const downloadBtn = document.getElementById("downloadBtn");
       const previewBody = document.getElementById("previewBody");
-
       const statResources = document.getElementById("statResources");
       const statTotalHours = document.getElementById("statTotalHours");
       const statTimePeriod = document.getElementById("statTimePeriod");
-
       let processedDataRows = [];
 
       fileInput.addEventListener("change", (e) => {
@@ -305,14 +504,14 @@
       function resetState() {
         processedDataRows = [];
         previewBody.innerHTML = `
-                <tr>
-                    <td colspan="7" class="p-8 text-center text-slate-400 font-medium bg-white">
-                        <div class="flex flex-col items-center justify-center space-y-2">
-                            <i data-lucide="database" class="w-8 h-8 text-slate-300"></i>
-                            <span>No data processed yet. Enter markdown on the left panel.</span>
-                        </div>
-                    </td>
-                </tr>`;
+          <tr>
+            <td colspan="7" class="p-8 text-center text-slate-400 font-medium bg-white dark:bg-slate-800">
+              <div class="flex flex-col items-center justify-center space-y-2">
+                <i data-lucide="database" class="w-8 h-8 text-slate-300 dark:text-slate-600"></i>
+                <span>No data processed yet. Enter markdown on the left panel.</span>
+              </div>
+            </td>
+          </tr>`;
         statResources.innerText = "0";
         statTotalHours.innerText = "0h 0m";
         statTimePeriod.innerText = "-";
@@ -437,8 +636,6 @@
         const totalH = Math.floor(aggregatedMinutes / 60);
         const totalM = aggregatedMinutes % 60;
         statTotalHours.innerText = `${totalH}h ${totalM}m`;
-
-        // Calc Time Period
         if (processedDataRows.length > 0) {
           const dates = processedDataRows.map(
             (r) =>
@@ -497,8 +694,8 @@
             if (item.isWeeklyTotal)
               return `<tr class="bg-indigo-600 text-white font-bold tracking-wide"><td colspan="4" class="p-3 text-right border-r border-indigo-500 uppercase">${item.label}</td><td class="p-3 text-center border-r border-indigo-500">${item.hours}</td><td class="p-3 text-center border-r border-indigo-500">${item.minutes}</td><td class="p-3"></td></tr>`;
             if (item.isTotal)
-              return `<tr class="bg-slate-200 text-slate-800 font-bold border-y-2 border-slate-300"><td colspan="4" class="p-3 text-right border-r border-slate-300 uppercase text-xs tracking-wider">${item.label}</td><td class="p-3 text-center border-r border-slate-300">${item.hours}</td><td class="p-3 text-center border-r border-slate-300">${item.minutes}</td><td class="p-3"></td></tr>`;
-            return `<tr class="${index % 2 === 0 ? "bg-white" : "bg-slate-50/60"} hover:bg-indigo-50/40 transition"><td class="p-3 text-center border-r border-slate-100 font-medium text-slate-600">${item.date}</td><td class="p-3 border-r border-slate-100 text-slate-500 font-medium">${item.project}</td><td class="p-3 border-r border-slate-100"><span class="px-2 py-1 text-[10px] font-semibold rounded-md ${getActivityTagStyle(item.activity)}">${item.activity || "N/A"}</span></td><td class="p-3 border-r border-slate-100 font-medium text-slate-700">${item.description}</td><td class="p-3 text-center border-r border-slate-100">${item.hours}</td><td class="p-3 text-center border-r border-slate-100">${item.minutes}</td><td class="p-3 font-semibold text-indigo-600">${item.resource}</td></tr>`;
+              return `<tr class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold border-y-2 border-slate-300 dark:border-slate-600"><td colspan="4" class="p-3 text-right border-r border-slate-300 dark:border-slate-600 uppercase text-xs tracking-wider">${item.label}</td><td class="p-3 text-center border-r border-slate-300 dark:border-slate-600">${item.hours}</td><td class="p-3 text-center border-r border-slate-300 dark:border-slate-600">${item.minutes}</td><td class="p-3"></td></tr>`;
+            return `<tr class="${index % 2 === 0 ? "bg-white dark:bg-slate-800" : "bg-slate-50/60 dark:bg-slate-800/50"} hover:bg-indigo-50/40 dark:hover:bg-indigo-900/20 transition"><td class="p-3 text-center border-r border-slate-100 dark:border-slate-700 font-medium text-slate-600 dark:text-slate-300">${item.date}</td><td class="p-3 border-r border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-medium">${item.project}</td><td class="p-3 border-r border-slate-100 dark:border-slate-700"><span class="px-2 py-1 text-[10px] font-semibold rounded-md ${getActivityTagStyle(item.activity)}">${item.activity || "N/A"}</span></td><td class="p-3 border-r border-slate-100 dark:border-slate-700 font-medium text-slate-700 dark:text-slate-200">${item.description}</td><td class="p-3 text-center border-r border-slate-100 dark:border-slate-700 dark:text-slate-300">${item.hours}</td><td class="p-3 text-center border-r border-slate-100 dark:border-slate-700 dark:text-slate-300">${item.minutes}</td><td class="p-3 font-semibold text-indigo-600 dark:text-indigo-400">${item.resource}</td></tr>`;
           })
           .join("");
       }
@@ -516,6 +713,34 @@
         return "bg-slate-100 text-slate-700 border border-slate-200";
       }
 
+      // Filename: Monday to Sunday of the week
+      function getWeekBounds(dates) {
+        // Find the Monday and Sunday bounding ALL dates in the dataset
+        let earliest = new Date(Math.min(...dates));
+        let latest = new Date(Math.max(...dates));
+
+        // Roll earliest back to Monday (day 1); Sunday = 0 → treat as 7
+        const dayOfWeekEarliest =
+          earliest.getDay() === 0 ? 7 : earliest.getDay();
+        const monday = new Date(earliest);
+        monday.setDate(earliest.getDate() - (dayOfWeekEarliest - 1));
+
+        // Roll latest forward to Sunday
+        const dayOfWeekLatest = latest.getDay() === 0 ? 7 : latest.getDay();
+        const sunday = new Date(latest);
+        sunday.setDate(latest.getDate() + (7 - dayOfWeekLatest));
+
+        return { monday, sunday };
+      }
+
+      function getYYMMDD(d) {
+        return (
+          d.getFullYear().toString().slice(-2) +
+          (d.getMonth() + 1).toString().padStart(2, "0") +
+          d.getDate().toString().padStart(2, "0")
+        );
+      }
+
       downloadBtn.addEventListener("click", async () => {
         if (processedDataRows.length === 0) return;
         const enrichedData = buildEnrichedData(processedDataRows);
@@ -531,7 +756,7 @@
           { header: "Resource", key: "resource", width: 18 },
         ];
 
-        // 1. Data Populating & Global Formatting
+        // Data Populating & Global Formatting
         enrichedData.forEach((item) => {
           const row = worksheet.addRow({
             date: item.date || item.label,
@@ -542,8 +767,6 @@
             minutes: item.minutes,
             resource: item.resource || "",
           });
-
-          // Apply alignment globally to all rows (Wrap Text + Middle)
           row.eachCell((cell) => {
             cell.alignment = {
               wrapText: true,
@@ -551,21 +774,17 @@
               horizontal: "center",
             };
           });
-          // Description (Col 4) remains Left
           row.getCell(4).alignment = {
             wrapText: true,
             vertical: "middle",
             horizontal: "left",
           };
-
           if (item.isWeeklyTotal || item.isTotal) {
-            // Right Align Total Row Labels
             row.getCell(1).alignment = {
               wrapText: true,
               vertical: "middle",
               horizontal: "right",
             };
-            // Set styles for Total Rows
             for (let i = 1; i <= 7; i++) {
               const cell = row.getCell(i);
               if (item.isWeeklyTotal) {
@@ -588,7 +807,6 @@
           }
         });
 
-        // 2. Header Style Override
         const headerRow = worksheet.getRow(1);
         headerRow.alignment = {
           wrapText: true,
@@ -605,23 +823,13 @@
           };
         }
 
-        // 3. Filename Date Calculation
+        // Filename: Monday to Sunday of the data's week
         const dates = processedDataRows.map(
           (r) => new Date(r.date.split(", ")[1] + ", " + r.date.split(", ")[2]),
         );
-        const minDate = new Date(Math.min(...dates));
-        const maxDate = new Date(Math.max(...dates));
-
-        const getYYMMDD = (d) => {
-          return (
-            d.getFullYear().toString().slice(-2) +
-            (d.getMonth() + 1).toString().padStart(2, "0") +
-            d.getDate().toString().padStart(2, "0")
-          );
-        };
-
-        const startStr = getYYMMDD(minDate);
-        const endStr = getYYMMDD(maxDate);
+        const { monday, sunday } = getWeekBounds(dates);
+        const startStr = getYYMMDD(monday);
+        const endStr = getYYMMDD(sunday);
         const fileName = `Deltapath_Enosis_QA_Timesheet_${startStr}_${endStr}.xlsx`;
 
         const buffer = await workbook.xlsx.writeBuffer();
